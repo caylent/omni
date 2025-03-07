@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "omni"
+version = "0.1.0"
+description = "OmniLake CLI"
+authors = ["Jim Rosser <jim.rosser@caylent.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+boto3 = "^1.35.10"
+pypdf = "^5.1.0"
+omnilake = { git = "https://github.com/caylent/omnilake", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+omni = "omni.client.shell:main"
