@@ -5,8 +5,8 @@ import argparse
 import logging
 import os
 
+from dotenv import load_dotenv
 from omni.commands import __all__ as available_commands
-
 
 def _execute_command(args):
     """
@@ -30,6 +30,7 @@ def _execute_command(args):
 def main():
     parser = argparse.ArgumentParser(description='OmniLake CLI')
 
+    parser.add_argument('--env', '-e', help='.env file to load during execution', default='.env.omni')
     parser.add_argument('--base_dir', '-D', help='Base Directory to work off index', default=os.getcwd())
 
     verbose = parser.add_mutually_exclusive_group()
@@ -50,6 +51,8 @@ def main():
         command_class.configure_parser(subparsers)
 
     args = parser.parse_args()
+
+    load_dotenv(dotenv_path=args.env)
 
     logging.basicConfig(level=args.loglevel)
 
