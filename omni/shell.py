@@ -26,12 +26,26 @@ def _execute_command(args):
 
     command.run(args)
 
+def _prepare_environment(args):
+    """
+    Read the environment variables from the .env file if it exists.
+    Adjust some of the variables for internal use
+    """
+    if args.env:
+        load_dotenv(dotenv_path=args.env)
+    elif os.path.exists('.env'):
+        load_dotenv()
+    
+    os.environ['DA_VINCI_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
+    os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
 
 def main():
     parser = argparse.ArgumentParser(description='OmniLake CLI')
 
-    parser.add_argument('--env', '-e', help='.env file to load during execution', default='.env.omni')
-    parser.add_argument('--base_dir', '-D', help='Base Directory to work off index', default=os.getcwd())
+    parser.add_argument('--env', '-e', help='Optional .env file to ')
+    parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"', default="omnilake")
+    parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
+    parser.add_argument('--base-dir', '-D', help='Base Directory to work off index', default=os.getcwd())
 
     verbose = parser.add_mutually_exclusive_group()
 
@@ -52,7 +66,7 @@ def main():
 
     args = parser.parse_args()
 
-    load_dotenv(dotenv_path=args.env)
+    _prepare_environment(args)
 
     logging.basicConfig(level=args.loglevel)
 
