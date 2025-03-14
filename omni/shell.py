@@ -42,7 +42,7 @@ def _prepare_environment(args):
 def main():
     parser = argparse.ArgumentParser(description='OmniLake CLI')
 
-    parser.add_argument('--env', '-e', help='Optional .env file to ')
+    parser.add_argument('--env', '-e', help='Optional .env file')
     parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"', default="omnilake")
     parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
     parser.add_argument('--base-dir', '-D', help='Base Directory to work off index', default=os.getcwd())
