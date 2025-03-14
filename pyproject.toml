@@ -17,4 +17,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-omni = "omni.client.shell:main"
+omni = "omni.shell:main"

@@ -3,8 +3,8 @@ import time
 from datetime import datetime
 from typing import Optional
 
-from omnilake.client import OmniLake
-from omnilake.request_definitions import (
+from omnilake.client.client import OmniLake
+from omnilake.client.request_definitions import (
     DescribeJob,
     DirectResponseConfig,
     GetEntry,
