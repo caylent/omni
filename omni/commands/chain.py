@@ -13,9 +13,7 @@ from omnilake.client.request_definitions import (
     SubmitChainRequest,
 )
 
-
 from omni.commands.base import Command
-
 
 def output_lake_response(omnilake: OmniLake, request_id: str, request_name: str):
     """
@@ -53,11 +51,8 @@ class ChainCommand(Command):
 
     @classmethod
     def configure_parser(cls, parser):
-        chain_parser = parser.add_parser(cls.command_name, help=cls.description)
-
-        chain_parser.add_argument('chain_definition', help='The chain definition file to execute')
-
-        return chain_parser
+        parser.add_argument('chain_definition', help='The chain definition file to execute')
+        return
 
     def run(self, args):
         """

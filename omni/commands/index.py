@@ -18,14 +18,11 @@ from omni.commands.base import Command
 
 from omni.fileutil import collect_files
 
-
 logger = getLogger(__name__)
-
 
 class RefreshIndexCommand(Command):
     command_name='index'
-
-    description='Create or update the index'
+    description='Create or update the index based on the files in the base directory'
 
     def __init__(self, omnilake_app_name: Optional[str] = None, omnilake_deployment_id: Optional[str] = None):
         super().__init__()
@@ -38,9 +35,7 @@ class RefreshIndexCommand(Command):
 
     @classmethod
     def configure_parser(cls, parser):
-        index_parser = parser.add_parser('index', help='Indexes the source code')
-
-        return index_parser
+        return
 
     def create_archive(self, archive_name: str):
         """
@@ -50,7 +45,7 @@ class RefreshIndexCommand(Command):
             archive = CreateArchive(
                 archive_id=archive_name,
                 configuration=VectorArchiveConfiguration(),
-                description=f'Archive for local file directory {archive_name} from somone\'s computer :shrug:',
+                description=f'Archive for local file directory {archive_name} from someone\'s computer :shrug:',
             )
 
             self.omnilake.request(archive)

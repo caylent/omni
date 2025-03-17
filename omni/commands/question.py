@@ -1,5 +1,6 @@
 import time
 
+from argparse import ArgumentParser
 from datetime import datetime
 from typing import Optional
 
@@ -14,14 +15,11 @@ from omnilake.client.request_definitions import (
     VectorLookup,
 )
 
-
 from omni.commands.base import Command
-
 
 class QuestionCommand(Command):
     command_name='question'
-
-    description='Answer a question from the user about the project'
+    description='Perform a summarization over an archive to answer a question or goal from the user'
 
     def __init__(self, omnilake_app_name: Optional[str] = None,
                  omnilake_deployment_id: Optional[str] = None):
@@ -31,12 +29,8 @@ class QuestionCommand(Command):
         )
 
     @classmethod
-    def configure_parser(cls, parser):
-        question_parser = parser.add_parser('question', help='Answer a question about the project')
-
-        question_parser.add_argument('question', help='Question or goal to be answered')
-
-        return question_parser
+    def configure_parser(cls, parser: ArgumentParser):
+        parser.add_argument('question', help='Question or goal to be answered')
 
     def _execute_request_and_wait(self, request: SubmitLakeRequest):
         """

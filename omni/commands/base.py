@@ -3,13 +3,12 @@ from argparse import ArgumentParser
 
 class Command:
     command_name = None
-
     description = None
 
     @classmethod
-    def configure_parser(cls, parser: ArgumentParser) -> ArgumentParser:
+    def configure_parser(cls, parser: ArgumentParser):
         # Override this to add arguments to the command
-        return parser
+        return
 
     def run(self, args):
         raise NotImplementedError
