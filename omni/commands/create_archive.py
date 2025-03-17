@@ -1,24 +1,19 @@
 #create archive
 import time
-
 from logging import getLogger
 from typing import Optional
-
 from omnilake.client.client import OmniLake
 from omnilake.client.construct_request_definitions import WebSiteArchiveConfiguration, BasicArchiveConfiguration
 from omnilake.client.request_definitions import (
     CreateArchive,
     VectorArchiveConfiguration,
 )
-
 from omnilake.client.commands.base import Command
 
 logger = getLogger(__name__)
 
-
 class CreateArchiveCommand(Command):
     command_name='create-archive'
-
     description='Create a new archive'
 
     def __init__(self, omnilake_app_name: Optional[str] = None, omnilake_deployment_id: Optional[str] = None):
@@ -62,8 +57,6 @@ class CreateArchiveCommand(Command):
 
         if(configuration_type=='BasicArchiveConfiguration'):
             return BasicArchiveConfiguration()
-
-
 
     def create_archive(self, archive_name: str, description:str, configuration_type: str, configuration_params: dict):
         """

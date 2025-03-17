@@ -1,12 +1,6 @@
 #create source type
-import time
-
 from logging import getLogger
 from typing import Optional
-import json
-
-import pypdf
-
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import (
     AddEntry,
@@ -15,18 +9,13 @@ from omnilake.client.request_definitions import (
     CreateArchive,
     VectorArchiveConfiguration,
 )
-
 from omnilake.client.commands.base import Command
-
 from omnilake.client.fileutil import collect_files
-
 
 logger = getLogger(__name__)
 
-
 class CreateSourceTypeCommand(Command):
     command_name='create-source-type'
-
     description='Create a new source type'
 
     def __init__(self, omnilake_app_name: Optional[str] = None, omnilake_deployment_id: Optional[str] = None):
