@@ -6,6 +6,7 @@ import pypdf
 from logging import getLogger
 from typing import List, Optional
 from argparse import ArgumentParser
+from datetime import timedelta
 
 from omni.commands.base import Command
 from omni.utils.fileutil import collect_files
@@ -193,8 +194,9 @@ class RefreshIndexCommand(Command):
             raise ValueError(f'{args.directory} does not exist')
             
         directory_abspath = directory_path.absolute()
+        start = time.time()
 
-        print(f'Indexing files in {directory_abspath} to archive {archive_id}')
+        print(f'Index files in {directory_abspath} to archive {archive_id}')
 
         # Create the archive if it doesn't exist
         # archive should enforce latest version
@@ -208,7 +210,12 @@ class RefreshIndexCommand(Command):
         
         collected_files = collect_files(directory=directory_path, recursive=args.recursive, ignore_patterns=self.ignore_patterns)
 
+        print(f'{len(collected_files)} file(s) found. Processing...')
+
         # Iterate over the files in the base directory and load them into the archive        
         self._process_file_list(archive_name=archive_id, directory=directory_abspath, file_list=collected_files)
 
+        end = time.time()
+        
+        print(f'Processed {len(collected_files)} file(s) in', timedelta(seconds=end-start))
         print('Indexing complete')
