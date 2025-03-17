@@ -11,10 +11,11 @@ python = "^3.12"
 boto3 = "^1.35.10"
 pypdf = "^5.1.0"
 omnilake = { git = "https://github.com/caylent/omnilake", develop = true }
+python-dotenv = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-omni = "omni.client.shell:main"
+omni = "omni.shell:main"
