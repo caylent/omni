@@ -26,7 +26,6 @@ class OmniShell:
         parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
         
         parser.add_argument('--verbosity', '-v', help='Set the verbosity level', default=0, action='count')
-        parser.add_argument('--base-dir', '-D', help='Base Directory to work off index', default=os.getcwd())
 
         subparsers_action = parser.add_subparsers(title='Command', dest='command', help='The command to execute', required=True)
 

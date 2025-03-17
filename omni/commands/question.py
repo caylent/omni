@@ -26,6 +26,7 @@ class QuestionCommand(Command):
 
     def __init__(self, omnilake_app_name: Optional[str] = None,
                  omnilake_deployment_id: Optional[str] = None):
+        super().__init__()
         self.omnilake = OmniLake(
             app_name=omnilake_app_name,
             deployment_id=omnilake_deployment_id,
@@ -120,6 +121,9 @@ class QuestionCommand(Command):
     def _describe_result(self, request_id: str):
         """
         Describe the request result
+
+        Keyword Arguments:
+        request_id -- the request ID to describe
         """
         response = self.omnilake.request(DescribeLakeRequest(lake_request_id=request_id))
 
