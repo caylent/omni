@@ -46,6 +46,7 @@ class OmniShell:
         """
         Read the environment variables from the .env file provided.
         Adjust some of the variables for internal use.
+        Prepare the environment for execution.
         """
         if args.env:
             load_dotenv(dotenv_path=args.env)
@@ -54,6 +55,8 @@ class OmniShell:
         os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
         os.environ['OMNILAKE_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
         os.environ['OMNILAKE_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
+
+        logging.basicConfig(level=args.loglevel)
 
     def _execute_command(self, args) -> None:
         """
@@ -76,12 +79,8 @@ class OmniShell:
         """
         Run the CLI
         """
-        parser = self._prepare_arguments()
-
-        args = self._prepare_command_arguments(parser)
+        args = self._prepare_arguments()
 
         self._prepare_environment(args)
-
-        logging.basicConfig(level=args.loglevel)
 
         self._execute_command(args)
