@@ -92,6 +92,8 @@ class QuestionCommand(Command):
 
         job_status = job_resp.response_body['status']
 
+        job_failed = False
+
         while job_status != 'COMPLETED':
             time.sleep(10)
 
@@ -103,7 +105,8 @@ class QuestionCommand(Command):
                 if job_status == 'FAILED':
                     print(f'Job failed: {job_resp.response_body["status_message"]}')
 
-                    return None
+                    job_failed = True
+                    break
 
                 print(f'Job status updated: {job_status}')
 
@@ -116,7 +119,7 @@ class QuestionCommand(Command):
 
         print(f'Total run time: {total_run_time}')
 
-        return request_id
+        return request_id if not job_failed else None
 
     def _describe_result(self, request_id: str):
         """
