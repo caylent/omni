@@ -25,10 +25,10 @@ class OmniShell:
         parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"', default="omnilake")
         parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
         
-        parser.add_argument('--verbosity, -v', help='Set the verbosity level', default=0, action='count')
+        parser.add_argument('--verbosity', '-v', help='Set the verbosity level', default=0, action='count')
         parser.add_argument('--base-dir', '-D', help='Base Directory to work off index', default=os.getcwd())
 
-        subparsers_action = parser.add_subparsers(dest='command', help='The command to execute', required=True)
+        subparsers_action = parser.add_subparsers(title='Command', dest='command', help='The command to execute', required=True)
 
         for _, command_class in self.available_commands.items():
             subparser = subparsers_action.add_parser(command_class.command_name, help=command_class.description)
@@ -50,14 +50,14 @@ class OmniShell:
         os.environ['OMNILAKE_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
         os.environ['OMNILAKE_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
 
-        if(args.verbosity >= 2):
-            args.loglevel = logging.DEBUG
-        elif(args.verbosity >= 1):
-            args.loglevel = logging.INFO
+        if(args.verbosity  >= 2):
+            loglevel = logging.DEBUG
+        elif(args.verbosity  >= 1):
+            loglevel = logging.INFO
         else:
-            args.loglevel = logging.NOTSET
+            loglevel = logging.ERROR
 
-        logging.basicConfig(level=args.loglevel)
+        logging.basicConfig(level=loglevel)
 
     def _execute_command(self, args) -> None:
         """
