@@ -1,16 +1,10 @@
-import time
+import omni.utils.lakerequestutil as lakerequestutil
 
 from argparse import ArgumentParser
-from datetime import datetime
 from typing import Optional
 
 from omnilake.client.client import OmniLake
-from omnilake.client.request_definitions import (
-    DescribeJob,
-    GetEntry,
-    DescribeLakeRequest,
-    SubmitLakeRequest
-)
+from omnilake.client.request_definitions import SubmitLakeRequest
 from omnilake.client.construct_request_definitions  import (
     DirectResponseConfig,
     SimpleResponseConfig,
@@ -76,74 +70,6 @@ class QuestionCommand(Command):
 
         return request
 
-    def _execute_request_and_wait(self, request: SubmitLakeRequest):
-        """
-        Execute the request against OmniLake and wait for a response
-
-        Keyword Arguments:
-        request -- the request to execute
-        """
-        resp = self.omnilake.request(request)
-
-        current_job_id = resp.response_body['job_id']
-        current_job_type = resp.response_body['job_type']
-        request_id = resp.response_body['lake_request_id']
-
-        job_describe = DescribeJob(
-            job_id=current_job_id,
-            job_type=current_job_type,
-        )
-
-        job_resp = self.omnilake.request(job_describe)
-
-        job_status = job_resp.response_body['status']
-
-        job_failed = False
-
-        while job_status != 'COMPLETED':
-            time.sleep(10)
-
-            job_resp = self.omnilake.request(job_describe)
-
-            if job_resp.response_body['status'] != job_status:
-                job_status = job_resp.response_body['status']
-
-                if job_status == 'FAILED':
-                    print(f'Job failed: {job_resp.response_body["status_message"]}')
-
-                    job_failed = True
-                    break
-
-                print(f'Job status updated: {job_status}')
-
-        print(f'Final job status: {job_status}')
-
-        started = datetime.fromisoformat(job_resp.response_body['started'])
-        ended = datetime.fromisoformat(job_resp.response_body['ended'])
-
-        total_run_time = ended - started
-
-        print(f'Total run time: {total_run_time}')
-
-        return request_id if not job_failed else None
-
-    def _describe_result(self, request_id: str):
-        """
-        Describe the request result
-
-        Keyword Arguments:
-        request_id -- the request ID to describe
-        """
-        response = self.omnilake.request(DescribeLakeRequest(lake_request_id=request_id))
-
-        entry_id = response.response_body['response_entry_id']
-
-        content_resp = self.omnilake.request(GetEntry(entry_id=entry_id))
-
-        entry_content = content_resp.response_body['content']
-
-        print(f"Response from server\n=================\n\n{entry_content}")
-
     def run(self, args):
         """
         Execute the command
@@ -152,10 +78,17 @@ class QuestionCommand(Command):
 
         request = self._build_request(args)
 
-        request_id = self._execute_request_and_wait(request=request)
+        request_id = lakerequestutil.execute_and_wait(
+            omnilake=self.omnilake,
+            request=request,
+            return_id_property='lake_request_id',
+        )
 
         if not request_id:
             print('Request failed to complete, check logs for more information')
             return
 
-        self._describe_result(request_id=request_id)
+        lakerequestutil.describe_result(
+            omnilake=self.omnilake,
+            lake_request_id=request_id
+            )

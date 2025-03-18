@@ -273,6 +273,46 @@ class MyCommand(Command):
         # Do your thing ;)
 ```
 
+## Util Functions
+
+Omni exposes a few utility scripts for common tasks in OmniLake. You can find them under the `/omni/utils` directory.
+
+### fileutil.py
+
+```python
+def collect_files(directory: Union[str, Path], ignore_patterns: List[str] = [], recursive: bool = True) -> List[Path]:
+    """
+    Collect all files in a directory, respecting ignore patterns.
+    
+    Args:
+    directory -- the directory to collect files from
+    ignore_patterns -- a list of patterns to ignore (gitignore-style)
+    recursive -- whether to search recursively or not
+    """    
+```
+
+### lakerequestutil.py
+
+```python
+def execute_and_wait(omnilake: OmniLake, request: LakeRequest, return_id_property: str) -> str:
+    """
+    Execute a lake request and wait for it to complete
+
+    Keyword arguments:
+    omnilake -- the OmniLake client
+    request -- the request to execute
+    """
+
+def describe_result(omnilake: OmniLake, lake_request_id: str, request_name: str = None):
+    """
+    Describe the resulting content of a lake request
+
+    Keyword arguments:
+    omnilake -- the OmniLake client
+    lake_request_id -- the ID of the lake request
+    """
+```
+
 ## Contributing
 
 We welcome contributions!
