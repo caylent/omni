@@ -38,6 +38,7 @@ class QuestionCommand(Command):
         lookup_group.add_argument('--archive', '-a', help='An archive ID to query', action='append', required=True)
         lookup_group.add_argument('--max-entries', help='The maximum number of entries to return from the lookup. Defaults to 10', default=10, type=int)
         lookup_group.add_argument('--lookup-query', help='The query to send to the lookup. Defaults to the "question" argument')
+        lookup_group.add_argument('--tag', help='Prioritized tags for the lookup', action='append')
                 
         processing_group = parser.add_argument_group('processing', 'Processing instructions')
         processing_group.add_argument('question', help='The question to be answered')
@@ -61,6 +62,7 @@ class QuestionCommand(Command):
                     archive_id=archive,
                     max_entries=args.max_entries,
                     query_string=args.lookup_query or args.question,
+                    prioritize_tags=args.tag,
                 ))
 
         request = SubmitLakeRequest(
