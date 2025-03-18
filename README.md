@@ -237,10 +237,10 @@ For more information on chain requests, refer to the OmniLake documentation.
 
 If you want to add your own commands or use the pre-built ones from the [caylent/omnilake-extensions](https://github.com/caylent/omnilake-extensions) repository, you'll need to create your own poetry project and add Omni as a dependency.
 
-You can then add the imported commands to the `OmniShell` class:
+You can then add the imported commands to the `Shell` class:
 
 ```python
-from omni.omnishell import OmniShell
+from omni.shell import Shell
 
 from myshell.commands import __all__ as custom_commands
 from omnilake.shell.confluence import __all__ as confluence_commands
@@ -248,7 +248,7 @@ from omnilake.shell.confluence import __all__ as confluence_commands
 def main():
     extra_commands = {**custom_commands, **confluence_commands}
 
-    OmniShell(more_commands=extra_commands).run()
+    Shell(more_commands=extra_commands).run()
 ```
 
 All commands need to inherit from the `CommandClass`:
