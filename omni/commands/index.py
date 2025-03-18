@@ -41,7 +41,7 @@ class RefreshIndexCommand(Command):
     def configure_parser(cls, parser: ArgumentParser):
         parser.add_argument('--archive', '-a', help='The archive to create or update the index. Defaults to the "directory" name')
         parser.add_argument('--directory', '-D', help='The directory to index files from. Defaults to the working directory', default=os.getcwd())
-        parser.add_argument('--recursive', '-R', help='Recursively index files in the directory', action='store_false')
+        parser.add_argument('--shallow', '-s', help='Only index files in the root directory', action='store_true')
         parser.add_argument('--ignore', '-i', help=f'Ignore files matching the pattern. Already ignores {cls.ignore_patterns}', action='append')
 
     def _create_archive(self, directory: str, archive_id: str):
@@ -208,7 +208,7 @@ class RefreshIndexCommand(Command):
         if args.ignore:
             self.ignore_patterns.extend(args.ignore)
         
-        collected_files = collect_files(directory=directory_path, recursive=args.recursive, ignore_patterns=self.ignore_patterns)
+        collected_files = collect_files(directory=directory_path, recursive=not args.shallow, ignore_patterns=self.ignore_patterns)
 
         print(f'{len(collected_files)} file(s) found. Processing...')
 

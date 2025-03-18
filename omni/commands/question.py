@@ -35,7 +35,7 @@ class QuestionCommand(Command):
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):
         lookup_group = parser.add_argument_group('lookup', 'Archive lookup instructions')
-        lookup_group.add_argument('archive', help='The archive ID to query')
+        lookup_group.add_argument('--archive', '-a', help='An archive ID to query', action='append', required=True)
         lookup_group.add_argument('--max-entries', help='The maximum number of entries to return from the lookup. Defaults to 10', default=10, type=int)
         lookup_group.add_argument('--lookup-query', help='The query to send to the lookup. Defaults to the "question" argument')
                 
@@ -53,14 +53,18 @@ class QuestionCommand(Command):
         """
         goal = args.goal or f"Answer the following question: {args.question}"
         
-        request = SubmitLakeRequest(
-            lookup_instructions=[
+        lookup_instructions = []
+
+        for archive in args.archive:
+            lookup_instructions.append(
                 VectorLookup(
-                    archive_id=args.archive,
+                    archive_id=archive,
                     max_entries=args.max_entries,
                     query_string=args.lookup_query or args.question,
-                ),
-            ],
+                ))
+
+        request = SubmitLakeRequest(
+            lookup_instructions=lookup_instructions,
             processing_instructions=SummarizationProcessor(
                 goal=goal,
                 include_source_metadata=True,
@@ -142,7 +146,7 @@ class QuestionCommand(Command):
         """
         Execute the command
         """
-        print(f'Requesting information against archive: {args.archive}')
+        print(f'Requesting information against the archive(s): {args.archive}')
 
         request = self._build_request(args)
 
