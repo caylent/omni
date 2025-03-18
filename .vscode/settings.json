@@ -4,7 +4,6 @@
         "jobutil",
         "lakerequestutil",
         "omnilake",
-        "omnishell",
         "sourcetypeutil"
     ]
 }
