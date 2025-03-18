@@ -1,4 +1,4 @@
-import jobutil
+import omni.utils.jobutil as jobutil
 
 from logging import getLogger
 from omnilake.client.client import OmniLake
@@ -14,10 +14,10 @@ def create_archive_and_wait(omnilake: OmniLake, archive: CreateArchive):
     omnilake -- the OmniLake client
     archive -- the archive to create
     """
+    archive_id = archive.attributes['archive_id']
+    
     try:
         response = omnilake.request(archive)
-
-        archive_id = archive.attributes['archive_id']
 
         job_id = response.response_body['job_id']
         job_type = response.response_body['job_type']

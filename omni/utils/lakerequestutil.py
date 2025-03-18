@@ -1,4 +1,4 @@
-import jobutil
+import omni.utils.jobutil as jobutil
 
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import (

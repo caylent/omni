@@ -5,7 +5,7 @@ from omnilake.client.request_definitions import CreateSourceType
 
 logger = getLogger(__name__)
 
-def create_source_type(omnilake: OmniLake, name: str, description: str, required_fields: List[str]):
+def create_source_type(omnilake: OmniLake, name: str, description: str, required_fields: list[str]):
     """
     Create the source type if it doesn't exist
 
