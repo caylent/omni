@@ -6,19 +6,18 @@ import os
 
 from argparse import ArgumentParser
 from dotenv import load_dotenv
+from omni.commands.base import Command
 from omni.commands import __all__ as core_commands
 
 class OmniShell:
-    def __init__(self, more_commands: dict = None):
-        self.available_commands = core_commands
-        if more_commands:
-            self.available_commands.update(more_commands)
+    def __init__(self, more_commands: dict[str, Command] = {}):
+        self.available_commands = {**core_commands, **more_commands}        
 
     def _prepare_arguments(self) -> ArgumentParser:
         """
         Prepare the base arguments for the CLI
         """
-        parser = ArgumentParser(description='OmniLake CLI')
+        parser = ArgumentParser(description='Omni, the OmniLake CLI')
 
         parser.add_argument('--env', '-e', help='Optional .env file')
 

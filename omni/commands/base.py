@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-
 class Command:
     command_name = None
     description = None

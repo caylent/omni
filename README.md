@@ -246,11 +246,31 @@ from myshell.commands import __all__ as custom_commands
 from omnilake.shell.confluence import __all__ as confluence_commands
 
 def main():
-    extra_commands = {}
-    extra_commands.update(custom_commands)
-    extra_commands.update(confluence_commands)
+    extra_commands = {**custom_commands, **confluence_commands}
 
     OmniShell(more_commands=extra_commands).run()
+```
+
+All commands need to inherit from the `CommandClass`:
+
+```python
+from argparse import ArgumentParser
+from omni.commands.base import Command
+
+class MyCommand(Command):
+    command_name = 'my-command'
+    description = 'A cool description of my command'
+
+    def __init__():
+        super().__init__()
+        # Initialize stuff
+
+    @classmethod
+    def configure_parser(cls, parser: ArgumentParser):
+        parser.add_argument('--foo', help='A super useful argument')
+
+    def run(self, args):
+        # Do your thing ;)
 ```
 
 ## Contributing
