@@ -277,6 +277,18 @@ class MyCommand(Command):
 
 Omni exposes a few utility scripts for common tasks in OmniLake. You can find them under the `/omni/utils` directory.
 
+### archiveutil.py
+```python
+def create_archive_and_wait(omnilake: OmniLake, archive: CreateArchive):
+    """
+    Create an archive and wait for it to finish provisioning
+
+    Keyword arguments:
+    omnilake -- the OmniLake client
+    archive -- the archive to create
+    """
+```
+
 ### fileutil.py
 
 ```python
@@ -289,6 +301,20 @@ def collect_files(directory: Union[str, Path], ignore_patterns: List[str] = [], 
     ignore_patterns -- a list of patterns to ignore (gitignore-style)
     recursive -- whether to search recursively or not
     """    
+```
+
+### jobutil.py
+
+```python
+def wait_for_completion(omnilake: OmniLake, job_id: str, job_type: str):
+    """
+    Wait for a job to complete and return if it was successful
+
+    Keyword arguments:
+    omnilake -- the OmniLake client
+    job_id -- the ID of the job
+    job_type -- the type of the job
+    """
 ```
 
 ### lakerequestutil.py
@@ -310,6 +336,21 @@ def describe_result(omnilake: OmniLake, lake_request_id: str, request_name: str 
     Keyword arguments:
     omnilake -- the OmniLake client
     lake_request_id -- the ID of the lake request
+    """
+```
+
+### sourcetypeutil.py
+
+```python
+def create_source_type(omnilake: OmniLake, name: str, description: str, required_fields: List[str]):
+    """
+    Create the source type if it doesn't exist
+
+    Keyword arguments:
+    omnilake -- the OmniLake client
+    name -- the name of the source type
+    description -- the description of the source type
+    required_fields -- the required fields for the source type
     """
 ```
 

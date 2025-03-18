@@ -1,7 +1,10 @@
 {
     "cSpell.words": [
+        "archiveutil",
+        "jobutil",
         "lakerequestutil",
         "omnilake",
-        "omnishell"
+        "omnishell",
+        "sourcetypeutil"
     ]
 }

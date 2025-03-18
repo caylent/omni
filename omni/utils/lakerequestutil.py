@@ -1,10 +1,7 @@
-import time
-
-from datetime import datetime
+import jobutil
 
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import (
-    DescribeJob, 
     LakeRequest, 
     DescribeLakeRequest, 
     GetEntry
@@ -24,43 +21,9 @@ def execute_and_wait(omnilake: OmniLake, request: LakeRequest, return_id_propert
     job_type = resp.response_body['job_type']
     return_id = resp.response_body[return_id_property]
 
-    job_describe = DescribeJob(
-        job_id=job_id,
-        job_type=job_type,
-    )
+    job_completed = jobutil.wait_for_completion(omnilake, job_id, job_type)
 
-    job_resp = omnilake.request(job_describe)
-
-    job_status = job_resp.response_body['status']
-
-    job_failed = False
-
-    while job_status != 'COMPLETED':
-        time.sleep(10)
-
-        job_resp = omnilake.request(job_describe)
-
-        if job_resp.response_body['status'] != job_status:
-            job_status = job_resp.response_body['status']
-
-            if job_status == 'FAILED':
-                print(f'Job failed: {job_resp.response_body["status_message"]}')
-
-                job_failed = True
-                break
-
-            print(f'Job status updated: {job_status}')
-
-    print(f'Final job status: {job_status}')
-
-    started = datetime.fromisoformat(job_resp.response_body['started'])
-    ended = datetime.fromisoformat(job_resp.response_body['ended'])
-
-    total_run_time = ended - started
-
-    print(f'Total run time: {total_run_time}')
-
-    return return_id if not job_failed else None
+    return return_id if job_completed else None
 
 def describe_result(omnilake: OmniLake, lake_request_id: str, request_name: str = None):
     """

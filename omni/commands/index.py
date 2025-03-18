@@ -1,8 +1,11 @@
 import os
-from pathlib import Path
 import time
 import pypdf
 
+import omni.utils.archiveutil as archiveutil
+import omni.utils.sourcetypeutil as sourcetypeutil
+
+from pathlib import Path
 from logging import getLogger
 from typing import List, Optional
 from argparse import ArgumentParser
@@ -11,13 +14,10 @@ from datetime import timedelta
 from omni.commands.base import Command
 from omni.utils.fileutil import collect_files
 from omnilake.client.client import OmniLake
-from omnilake.tables.provisioned_archives.client import ArchiveStatus
 from omnilake.client.request_definitions import (
     AddEntry,
     AddSource,
-    CreateSourceType,
     CreateArchive,
-    DescribeArchive,
     VectorArchiveConfiguration,
 )
 
@@ -52,49 +52,13 @@ class RefreshIndexCommand(Command):
         directory -- the directory being indexed
         archive_name -- the archive ID
         """
-        try:
-            archive = CreateArchive(
-                archive_id=archive_id,
-                configuration=VectorArchiveConfiguration(),
-                description=f'Archive for local file directory {directory} from someone\'s computer :shrug:',
-            )
+        archive = CreateArchive(
+            archive_id=archive_id,
+            configuration=VectorArchiveConfiguration(),
+            description=f'Archive for local file directory {directory} from someone\'s computer :shrug:',
+        )
 
-            self.omnilake.request(archive)
-
-            print('Provisioning archive...')
-
-            while True:
-                time.sleep(10)
-                resp = self.omnilake.request(DescribeArchive(archive_id=archive_id))
-                if resp.response_body['status'] != ArchiveStatus.CREATING:
-                    break
-            
-            print(f'Archive {archive_id} ready')
-        except Exception as e:
-            if "Archive already exists" in str(e):
-                logger.info('Archive already exists')
-            else:
-                raise
-
-    def _create_source_type(self):
-        """
-        Create the "local_file" source type if it doesn't exist
-        """
-        try:
-            source_type = CreateSourceType(
-                name='local_file',
-                description='A file uploaded from a local system',
-                required_fields=['file_name', 'full_file_path', 'file_extension'],
-            )
-
-            self.omnilake.request(source_type)
-
-            print('Source type "local_file" created')
-        except Exception as e:
-            if "Source type already exists" in str(e):
-                logger.info('Source type "local_file" already exists')
-            else:
-                raise
+        archiveutil.create_archive_and_wait(self.omnilake, archive)
 
     def _process_file_list(self, archive_name, directory, file_list: List[Path]):
         """
@@ -203,7 +167,12 @@ class RefreshIndexCommand(Command):
         self._create_archive(directory=directory_abspath, archive_id=archive_id)
 
         # Create the source type if it doesn't exist
-        self._create_source_type()
+        sourcetypeutil.create_source_type(
+            omnilake=self.omnilake, 
+            name='local_file', 
+            description='A file uploaded from a local system', 
+            required_fields=['file_name', 'full_file_path', 'file_extension']
+        )
         
         if args.ignore:
             self.ignore_patterns.extend(args.ignore)
