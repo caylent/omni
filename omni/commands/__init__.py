@@ -1,8 +1,5 @@
 '''
-Omnitizer Commands
-
-- Index: Indexes the omnilake database by crawling the given directory
-- Question: Takes a question about the project and returns the answer
+Omni Core Commands
 '''
 
 from omni.commands.chain import ChainCommand
