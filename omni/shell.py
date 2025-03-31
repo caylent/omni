@@ -4,7 +4,7 @@ CLI Shell and Entry Point
 import logging
 import os
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from dotenv import load_dotenv
 from omni.commands.base import Command
 from omni.commands import __all__ as core_commands
@@ -13,7 +13,7 @@ class Shell:
     def __init__(self, more_commands: dict[str, Command] = {}):
         self.available_commands = {**core_commands, **more_commands}        
 
-    def _prepare_arguments(self) -> ArgumentParser:
+    def _prepare_arguments(self) -> Namespace:
         """
         Prepare the base arguments for the CLI
         """
@@ -34,7 +34,7 @@ class Shell:
 
         return parser.parse_args()
     
-    def _prepare_environment(self, args) -> None:
+    def _prepare_environment(self, args: Namespace) -> None:
         """
         Read the environment variables from the .env file provided.
         Adjust some of the variables for internal use.
@@ -57,7 +57,7 @@ class Shell:
 
         logging.basicConfig(level=loglevel)
 
-    def _execute_command(self, args) -> None:
+    def _execute_command(self, args: Namespace) -> None:
         """
         Execute the command requested by the user.
         """
@@ -74,7 +74,7 @@ class Shell:
 
         command.run(args)
 
-    def run(self) -> None:
+    def run(self):
         """
         Run the CLI
         """

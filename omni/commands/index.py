@@ -23,19 +23,14 @@ from omnilake.client.request_definitions import (
 
 logger = getLogger(__name__)
 
-class RefreshIndexCommand(Command):
+class IndexCommand(Command):
     command_name='index'
     description='Create or update the index based on the files in the directory'
 
     ignore_patterns=['.git*', '*__pycache__*', '*.pyc', 'poetry.lock', 'cdk.out*', '.DS_Store']
 
-    def __init__(self, omnilake_app_name: Optional[str] = None,
-                 omnilake_deployment_id: Optional[str] = None):
-        super().__init__()
-        self.omnilake = OmniLake(
-            app_name=omnilake_app_name,
-            deployment_id=omnilake_deployment_id,
-        )
+    def __init__(self):
+        self.omnilake = OmniLake()
 
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):

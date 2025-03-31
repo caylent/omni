@@ -1,7 +1,6 @@
 import omni.utils.lakerequestutil as lakerequestutil
 
 from argparse import ArgumentParser
-from typing import Optional
 
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import SubmitLakeRequest
@@ -18,13 +17,8 @@ class QuestionCommand(Command):
     command_name='question'
     description='Perform a summarization over an archive to answer a question or goal from the user'
 
-    def __init__(self, omnilake_app_name: Optional[str] = None,
-                 omnilake_deployment_id: Optional[str] = None):
-        super().__init__()
-        self.omnilake = OmniLake(
-            app_name=omnilake_app_name,
-            deployment_id=omnilake_deployment_id,
-        )
+    def __init__(self):
+        self.omnilake = OmniLake()
 
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):
