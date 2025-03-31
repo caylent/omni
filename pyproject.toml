@@ -2,7 +2,7 @@
 name = "omni"
 version = "0.1.0"
 description = "OmniLake CLI"
-authors = ["Jim Rosser <jim.rosser@caylent.com>"]
+authors = ["Jim Rosser <jim.rosser@caylent.com>","Cleverson Nascimento <cleverson.nascimento@caylent.com>","Willivan Palaro <willivan.palaro@caylent.com>"]
 license = "MIT"
 readme = "README.md"
 
@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.12"
 boto3 = "^1.35.10"
 pypdf = "^5.1.0"
-omnilake = { git = "https://github.com/caylent/omnilake", develop = true }
+omnilake = { git = "https://github.com/caylent/omnilake" }
 python-dotenv = "^1.0.1"
 
 [build-system]

@@ -1,10 +1,5 @@
 '''
-Omnitizer Commands
-
-- Index: Indexes the omnilake database by crawling the given directory
-- Question: Takes a question about the project and returns the answer
-- Create Archive: Creates an archive
-- Describe Archive: Describes an archive
+Omni Core Commands
 '''
 
 from omni.commands.chain import ChainCommand
