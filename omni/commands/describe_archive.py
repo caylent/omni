@@ -42,12 +42,11 @@ class DescribeArchiveCommand(Command):
             archive = DescribeArchive(archive_name)
             response = self.omnilake.request(archive)
             response_body = response.response_body
-            print(f'ArchiveId:{response_body["archive_id"]}')
-            print(f'Description:{response_body["description"]}')
-            print(f'Status:{response_body["status"]}')
-            print(f'Archive Type:{response_body["archive_type"]}')
-            print(f'Configuration Parameters:{response_body["configuration"]}')
-            time.sleep(30)
+            print(f"""ArchiveId: {response_body['archive_id']}
+Description: {response_body['description']}
+Status: {response_body['status']}
+Archive Type: {response_body['archive_type']}
+Configuration Parameters: {response_body['configuration']}""")
 
         except Exception as e:
             print('Error describing archive:', e)
