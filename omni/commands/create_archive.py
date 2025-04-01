@@ -68,7 +68,5 @@ class CreateArchiveCommand(Command):
     def run(self, args):
         print(f'Creating archive "{args.archive_id}"...')
         
-        configuration_params = dict_from_pair_list(args.configuration_params)
-        
-        self._create_archive(args.archive_id, args.description, args.configuration_type, configuration_params)
+        self._create_archive(args.archive_id, args.description, args.configuration_type, args.configuration_params)
 
