@@ -25,7 +25,7 @@ class CreateArchiveCommand(Command):
 
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):
-        parser.add_argument('archive-id', help='The new archive ID')
+        parser.add_argument('archive_id', help='The new archive ID')
         parser.add_argument('--description', '-d', help='Description of the new archive')
         parser.add_argument('--configuration-type', '-t',
                             help='The archive configuration type. Defaults to BasicArchiveConfiguration',

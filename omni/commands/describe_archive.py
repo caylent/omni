@@ -16,7 +16,7 @@ class DescribeArchiveCommand(Command):
 
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):
-        parser.add_argument('archive-id', help='The archive to be described')
+        parser.add_argument('archive_id', help='The archive to be described')
 
     def _describe_archive(self, archive_id: str):
         """
