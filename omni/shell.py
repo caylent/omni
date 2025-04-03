@@ -21,8 +21,8 @@ class Shell:
 
         parser.add_argument('--env', '-e', help='Optional .env file')
 
-        parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"', default="omnilake")
-        parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
+        parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"')
+        parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"')
         
         parser.add_argument('--verbosity', '-v', help='Set the verbosity level', default=0, action='count')
 
@@ -42,11 +42,11 @@ class Shell:
         """
         if args.env:
             load_dotenv(dotenv_path=args.env)
-        
-        os.environ['DA_VINCI_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
-        os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
-        os.environ['OMNILAKE_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
-        os.environ['OMNILAKE_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
+
+        os.environ['OMNILAKE_APP_NAME'] = args.app_name or os.getenv('APP_NAME', 'omnilake')
+        os.environ['OMNILAKE_DEPLOYMENT_ID'] = args.deployment_id or os.getenv('DEPLOYMENT_ID', 'dev')
+        os.environ['DA_VINCI_APP_NAME'] = os.environ['OMNILAKE_APP_NAME']
+        os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.environ['OMNILAKE_DEPLOYMENT_ID']
 
         if(args.verbosity  >= 2):
             loglevel = logging.DEBUG
@@ -86,4 +86,3 @@ class Shell:
 
 def main():
     Shell().run()
-    
