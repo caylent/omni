@@ -72,6 +72,9 @@ Command:
     chain               Execute a chain against OmniLake
     index               Create or update the index based on the files in the directory
     question            Perform a summarization over an archive to answer a question or goal from the user
+    create-archive      Create a new archive
+    create-source-type  Create a new source type
+    describe-archive    Describe an archive
 ```
 
 ### Optional Parameters
@@ -91,6 +94,39 @@ poetry run omni -e ".env" command ...
 ## Commands
 
 Omni contains multiple commands to help you manage your OmniLake instance, archives, entries, jobs, etc.
+
+### Index
+
+The index command allow you to specify a directory to index all its files into a single vector archive.
+
+Here's how to get the index command manual:
+
+```bash
+poetry run omni index -h
+```
+
+This will show the available options:
+
+```
+usage: omni.cmd index [-h] [--archive ARCHIVE] [--directory DIRECTORY] [--shallow] [--ignore IGNORE]
+
+options:
+  -h, --help            show this help message and exit
+  --archive ARCHIVE, -a ARCHIVE
+                        The archive to create or update the index. Defaults to the "directory" name
+  --directory DIRECTORY, -D DIRECTORY
+                        The directory to index files from. Defaults to the working directory
+  --shallow, -s         Only index files in the root directory
+  --ignore IGNORE, -i IGNORE
+                        Ignore files matching the pattern. Already ignores ['.git*', '*__pycache__*', '*.pyc', 'poetry.lock', 'cdk.out*', '.DS_Store']
+```
+
+#### Optional Parameters
+
+* `--archive ARCHIVE, -a ARCHIVE`: specify the name of the archive to create or update. If not provided, the name of the DIRECTORY will be used.
+* `--directory DIRECTORY, -D DIRECTORY`: specify the root directory to load the files to index.
+* `--shallow, -s`: if specified, will only load files in the root of the DIRECTORY.
+* `--ignore IGNORE, -i IGNORE`: specify multiple times to ignore different file patterns.
 
 ### Index
 
@@ -232,6 +268,37 @@ The basic structure of a chain file is as follows:
 You can find a complete example of a [chain file](https://github.com/caylent/omnilake/blob/main/examples/chain_file.json) in the OmniLake repository.
 
 For more information on chain requests, refer to the OmniLake documentation.
+
+### Create Archive
+
+The `create-archive` command provisions all the necessary resources for the archive.
+
+Here's how to get the create archive command manual:
+
+```bash
+poetry run omni create-archive -h
+```
+This will show the available options:
+
+```bash
+usage: omni.cmd create-archive [-h] [--description DESCRIPTION] [--configuration-type {VectorStoreConfiguration,WebSiteArchiveConfiguration,BasicArchiveConfiguration}] [--configuration-params CONFIGURATION_PARAMS] archive_id
+
+positional arguments:
+  archive_id            The new archive ID
+
+options:
+  -h, --help            show this help message and exit
+  --description DESCRIPTION, -d DESCRIPTION
+                        Description of the new archive
+  --configuration-type {VectorStoreConfiguration,WebSiteArchiveConfiguration,BasicArchiveConfiguration}, -t {VectorStoreConfiguration,WebSiteArchiveConfiguration,BasicArchiveConfiguration}
+                        The archive configuration type. Defaults to BasicArchiveConfiguration
+  --configuration-params CONFIGURATION_PARAMS, -p CONFIGURATION_PARAMS
+                        Collection of configuration parameter key value pairs
+```
+
+#### Parameters
+
+TODO
 
 ## Extending the Available Commands
 
