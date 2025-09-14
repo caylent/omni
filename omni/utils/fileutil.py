@@ -3,7 +3,7 @@ import fnmatch
 from pathlib import Path
 from typing import List, Union
 
-def collect_files(directory: Union[str, Path], ignore_patterns: List[str] = [], recursive: bool = True) -> List[Path]:
+def collect_files(directory: Union[str, Path], patterns: List[str] = ['*'], ignore_patterns: List[str] = [], recursive: bool = True) -> List[Path]:
     """
     Collect all files in a directory, respecting ignore patterns.
     
@@ -16,7 +16,7 @@ def collect_files(directory: Union[str, Path], ignore_patterns: List[str] = [], 
 
     files = []
 
-    for file in path.rglob('*') if recursive else path.glob('*'):
+    for file in path.rglob(*patterns) if recursive else path.glob(*patterns):
 
         if file.is_file():
             relative_path = file.relative_to(path)

@@ -13,6 +13,7 @@ from datetime import timedelta
 
 from omni.commands.base import Command
 from omni.utils.fileutil import collect_files
+from omni.utils.strutil import chunk_string_by_bytes
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import (
     AddEntry,
@@ -21,21 +22,19 @@ from omnilake.client.request_definitions import (
     VectorArchiveConfiguration,
 )
 
+
+CHUNK_SIZE = 131072  # 128 kB
+
 logger = getLogger(__name__)
 
-class RefreshIndexCommand(Command):
+class IndexCommand(Command):
     command_name='index'
     description='Create or update the index based on the files in the directory'
 
     ignore_patterns=['.git*', '*__pycache__*', '*.pyc', 'poetry.lock', 'cdk.out*', '.DS_Store']
 
-    def __init__(self, omnilake_app_name: Optional[str] = None,
-                 omnilake_deployment_id: Optional[str] = None):
-        super().__init__()
-        self.omnilake = OmniLake(
-            app_name=omnilake_app_name,
-            deployment_id=omnilake_deployment_id,
-        )
+    def __init__(self):
+        self.omnilake = OmniLake()
 
     @classmethod
     def configure_parser(cls, parser: ArgumentParser):
@@ -43,6 +42,9 @@ class RefreshIndexCommand(Command):
         parser.add_argument('--directory', '-D', help='The directory to index files from. Defaults to the working directory', default=os.getcwd())
         parser.add_argument('--shallow', '-s', help='Only index files in the root directory', action='store_true')
         parser.add_argument('--ignore', '-i', help=f'Ignore files matching the pattern. Already ignores {cls.ignore_patterns}', action='append')
+        parser.add_argument('--skip', '-S', help='Skip the first X files in the directory', type=int, default=0)
+        parser.add_argument('--pattern', '-p', help='Only index files matching the pattern', action='append')
+        parser.add_argument('--file', '-f', help='Only index these specific files', action='append')
 
     def _create_archive(self, directory: str, archive_id: str):
         """
@@ -60,58 +62,116 @@ class RefreshIndexCommand(Command):
 
         archiveutil.create_archive_and_wait(self.omnilake, archive)
 
-    def _process_file_list(self, archive_name, directory, file_list: List[Path]):
+    def _process_file_list(self, archive_name, directory, file_list: List[Path], skip: int = 0) -> List[Path]:
         """
-        Process the list of files to index
+        Process the list of files to index and return a list of failed files
 
         Keyword arguments:
         archive_name -- the archive ID
         directory -- the base directory that holds the files
         file_list -- the list of files to index
         """
-        for collected_file in file_list:
+        total_files = len(file_list)
+        failed_files = []
+
+        for file_number, collected_file in enumerate(iterable=file_list, start=1):
             relative_to_base = str(collected_file.relative_to(directory))
+
+            if file_number <= skip:
+                print(f'[{file_number}/{total_files}] Skipping {relative_to_base} by user choice')
+                continue
 
             file_contents = collected_file.read_bytes()
 
             if len(file_contents) == 0:
-                print(f'Skipped {relative_to_base} ... empty file')
+                print(f'[{file_number}/{total_files}] Skipped {relative_to_base} ... empty file')
                 continue
 
             if collected_file.name.endswith('.pdf'):
-                print('Detected PDF file, extracting text...')
+                print(f'[{file_number}/{total_files}] Detected PDF file, extracting text...')
 
-                pdf_reader = pypdf.PdfReader(stream=collected_file)
-
-                print('Splitting PDF into pages...')
-
-                for page_number, page in enumerate(pdf_reader.pages):
-                    self._index_file(
-                        archive_name=archive_name,
-                        file_contents=page.extract_text(),
-                        file_name=collected_file.name,
-                        file_path=relative_to_base,
-                        page_number=page_number,
-                    )
-
-                    print(f'Added {relative_to_base} page {page_number}')
+                success = self._index_pdf_file(collected_file, relative_to_base, archive_name, file_number, total_files)
+                
+                failed_files.append(collected_file) if not success else None
                 continue
 
             decoded_contents = file_contents.decode(encoding='utf-8', errors='ignore')
 
-            self._index_file(
+            # Split the file into chunks
+            chunks = chunk_string_by_bytes(decoded_contents, CHUNK_SIZE)
+
+            if len(chunks) == 0:
+                print(f'[{file_number}/{total_files}] Skipped {relative_to_base} ... empty file')
+                continue
+
+            if len(chunks) > 1:
+                success = self._index_chunks(chunks, archive_name, collected_file.name, relative_to_base, file_number, total_files)
+                
+                failed_files.append(collected_file) if not success else None
+                continue
+
+            # index single chunk file
+            success = self._index_file(
                 archive_name=archive_name,
                 file_contents=decoded_contents,
                 file_name=collected_file.name,
                 file_path=relative_to_base,
             )
 
-            print(f'Added {relative_to_base}')
+            if success:
+                print(f'[{file_number}/{total_files}] Added {relative_to_base}')
+            else:
+                print(f'[{file_number}/{total_files}] Failed to add {relative_to_base}')
+                failed_files.append(collected_file)
+
+        return failed_files
+
+    def _index_pdf_file(self, collected_file: Path, relative_to_base: str, archive_name: str, file_number: int, total_files: int) -> bool:
+        pdf_reader = pypdf.PdfReader(stream=collected_file)
+
+        success = True
+
+        for page_number, page in enumerate(iterable=pdf_reader.pages, start=1):
+            success = self._index_file(
+                archive_name=archive_name,
+                file_contents=page.extract_text(),
+                file_name=collected_file.name,
+                file_path=relative_to_base,
+                page_number=page_number,
+            )
+
+            if success:
+                print(f'[{file_number}/{total_files}] Added {relative_to_base} page {page_number}')
+            else:
+                print(f'[{file_number}/{total_files}] Failed to add {relative_to_base} page {page_number}')
+                break
+
+        return success
+    
+    def _index_chunks(self, chunks: List[str], archive_name: str, file_name: str, file_path: str, file_number: int, total_files: int) -> bool:
+        success = True
+
+        for chunk_number, chunk in enumerate(iterable=chunks, start=1):
+            success = self._index_file(
+                archive_name=archive_name,
+                file_contents=chunk,
+                file_name=file_name,
+                file_path=file_path,
+                page_number=chunk_number,
+            )
+
+            if success:
+                print(f'[{file_number}/{total_files}] Added {file_path} chunk {chunk_number}')
+            else:
+                print(f'[{file_number}/{total_files}] Failed to add {file_path} chunk {chunk_number}')
+                break
+
+        return success
 
     def _index_file(self, archive_name: str, file_contents: str, file_name: str, file_path: str,
-                    page_number: Optional[int] = None):
+                    page_number: Optional[int] = None) -> bool:
         """
-        Index a file
+        Index a file and return if it was successful
 
         Keyword arguments:
         archive_name -- the name of the archive
@@ -134,18 +194,47 @@ class RefreshIndexCommand(Command):
             },
         )
 
-        source_result = self.omnilake.request(source)
+        try:
+            source_result = self.omnilake.request(source)
 
-        source_rn = source_result.response_body['resource_name']
+            source_rn = source_result.response_body['resource_name']
 
-        entry = AddEntry(
-            content=file_contents,
-            sources=[source_rn],
-            destination_archive_id=archive_name,
-            original_of_source=source_rn,
-        )
+            entry = AddEntry(
+                content=file_contents,
+                sources=[source_rn],
+                destination_archive_id=archive_name,
+                original_of_source=source_rn,
+            )
 
-        self.omnilake.request(entry)
+            self.omnilake.request(entry)
+            return True
+        except Exception as e:
+            logger.error(f'Failed to index {file_name} ({file_path}). Error: {e}')
+            return False
+
+    def _recursive_process(self, archive_name: str, directory: str, file_list: List[Path], skip: int = 0) -> List[Path]:
+        start = time.time()
+
+        print(f'{len(file_list)} file(s) found. Processing...')
+        
+        failed_files = self._process_file_list(archive_name=archive_name, directory=directory, file_list=file_list, skip=skip)
+
+        end = time.time()
+        
+        print(f'Processed {len(file_list)-len(failed_files)} file(s) in', timedelta(seconds=end-start))
+
+        failed = len(failed_files)
+
+        if failed > 0:
+            print(f'Failed to index {failed} file(s)')
+            response = input('Do you want to try again? (y/n)')
+
+            if response.lower() == 'y':
+                self._recursive_process(archive_name=archive_name, directory=directory, file_list=failed_files, skip=0)
+            else:
+                print('Listing failed files. Add to the command line with -f option to retry')
+                for i, failed_file in enumerate(iterable=failed_files,start=1):
+                    print(f'-f "{failed_file.absolute()}"')
 
     def run(self, args):
         directory_path = Path(args.directory).resolve(strict=True)
@@ -156,9 +245,8 @@ class RefreshIndexCommand(Command):
 
         if not directory_path.exists():
             raise ValueError(f'{args.directory} does not exist')
-            
+        
         directory_abspath = directory_path.absolute()
-        start = time.time()
 
         print(f'Index files in {directory_abspath} to archive {archive_id}')
 
@@ -177,14 +265,12 @@ class RefreshIndexCommand(Command):
         if args.ignore:
             self.ignore_patterns.extend(args.ignore)
         
-        collected_files = collect_files(directory=directory_path, recursive=not args.shallow, ignore_patterns=self.ignore_patterns)
+        if args.file:
+            collected_files = [Path(file).resolve(strict=True) for file in args.file]
+            collected_files = [file for file in collected_files if file.exists() and file.is_file()]
+        else:
+            collected_files = collect_files(directory=directory_path, patterns=args.pattern if args.pattern else ['*'], recursive=not args.shallow, ignore_patterns=self.ignore_patterns)
 
-        print(f'{len(collected_files)} file(s) found. Processing...')
-
-        # Iterate over the files in the base directory and load them into the archive        
-        self._process_file_list(archive_name=archive_id, directory=directory_abspath, file_list=collected_files)
-
-        end = time.time()
+        self._recursive_process(archive_name=archive_id, directory=directory_abspath, file_list=collected_files, skip=args.skip)
         
-        print(f'Processed {len(collected_files)} file(s) in', timedelta(seconds=end-start))
         print('Indexing complete')

@@ -1,8 +1,6 @@
 import json
 import omni.utils.lakerequestutil as lakerequestutil
 
-from typing import Optional
-
 from omnilake.client.client import OmniLake
 from omnilake.client.request_definitions import (
     DescribeChainRequest,
@@ -13,15 +11,10 @@ from omni.commands.base import Command
 
 class ChainCommand(Command):
     command_name='chain'
-
     description='Execute a chain against OmniLake'
 
-    def __init__(self, omnilake_app_name: Optional[str] = None,
-                 omnilake_deployment_id: Optional[str] = None):
-        self.omnilake = OmniLake(
-            app_name=omnilake_app_name,
-            deployment_id=omnilake_deployment_id,
-        )
+    def __init__(self):
+        self.omnilake = OmniLake()
 
     @classmethod
     def configure_parser(cls, parser):

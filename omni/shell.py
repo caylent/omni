@@ -4,7 +4,7 @@ CLI Shell and Entry Point
 import logging
 import os
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from dotenv import load_dotenv
 from omni.commands.base import Command
 from omni.commands import __all__ as core_commands
@@ -13,7 +13,7 @@ class Shell:
     def __init__(self, more_commands: dict[str, Command] = {}):
         self.available_commands = {**core_commands, **more_commands}        
 
-    def _prepare_arguments(self) -> ArgumentParser:
+    def _prepare_arguments(self) -> Namespace:
         """
         Prepare the base arguments for the CLI
         """
@@ -21,8 +21,8 @@ class Shell:
 
         parser.add_argument('--env', '-e', help='Optional .env file')
 
-        parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"', default="omnilake")
-        parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"', default="dev")
+        parser.add_argument('--app-name', '--app', help='The name of the OmniLake app. Defaults to "omnilake"')
+        parser.add_argument('--deployment-id', '--dep-id', help='The OmniLake deployment ID. Defaults to "dev"')
         
         parser.add_argument('--verbosity', '-v', help='Set the verbosity level', default=0, action='count')
 
@@ -34,7 +34,7 @@ class Shell:
 
         return parser.parse_args()
     
-    def _prepare_environment(self, args) -> None:
+    def _prepare_environment(self, args: Namespace) -> None:
         """
         Read the environment variables from the .env file provided.
         Adjust some of the variables for internal use.
@@ -42,11 +42,11 @@ class Shell:
         """
         if args.env:
             load_dotenv(dotenv_path=args.env)
-        
-        os.environ['DA_VINCI_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
-        os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
-        os.environ['OMNILAKE_APP_NAME'] = os.getenv('APP_NAME', args.app_name)
-        os.environ['OMNILAKE_DEPLOYMENT_ID'] = os.getenv('DEPLOYMENT_ID', args.deployment_id)
+
+        os.environ['OMNILAKE_APP_NAME'] = args.app_name or os.getenv('APP_NAME', 'omnilake')
+        os.environ['OMNILAKE_DEPLOYMENT_ID'] = args.deployment_id or os.getenv('DEPLOYMENT_ID', 'dev')
+        os.environ['DA_VINCI_APP_NAME'] = os.environ['OMNILAKE_APP_NAME']
+        os.environ['DA_VINCI_DEPLOYMENT_ID'] = os.environ['OMNILAKE_DEPLOYMENT_ID']
 
         if(args.verbosity  >= 2):
             loglevel = logging.DEBUG
@@ -57,7 +57,7 @@ class Shell:
 
         logging.basicConfig(level=loglevel)
 
-    def _execute_command(self, args) -> None:
+    def _execute_command(self, args: Namespace) -> None:
         """
         Execute the command requested by the user.
         """
@@ -74,7 +74,7 @@ class Shell:
 
         command.run(args)
 
-    def run(self) -> None:
+    def run(self):
         """
         Run the CLI
         """
@@ -86,4 +86,3 @@ class Shell:
 
 def main():
     Shell().run()
-    
